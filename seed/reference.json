@@ -1,0 +1,42 @@
+{
+  "categories": [
+    "Drama",
+    "Crime",
+    "Action",
+    "Comedy",
+    "Sci-Fi",
+    "Thriller",
+    "Documentary"
+  ],
+  "sections": [
+    "Trending Now",
+    "Popular Dramas",
+    "Crime Chronicles",
+    "Top Rated",
+    "New Releases"
+  ],
+  "languages": [
+    "English",
+    "Hindi",
+    "Spanish",
+    "Tamil",
+    "Marathi"
+  ],
+  "artwork_rules": {
+    "poster": {
+      "dimensions": [600, 900],
+      "aspect_ratio": "2:3",
+      "max_size_kb": 200
+    },
+    "banner": {
+      "dimensions": [1280, 720],
+      "aspect_ratio": "16:9",
+      "max_size_kb": 200
+    },
+    "thumbnail": {
+      "dimensions": [640, 360],
+      "aspect_ratio": "16:9",
+      "max_size_kb": 200
+    }
+  }
+}

@@ -1,0 +1,108 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  backend-test:
+    name: Backend Tests & Lint
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: peblo_admin
+          POSTGRES_PASSWORD: peblo_secret_pass
+          POSTGRES_DB: peblo_tv_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Install Backend Dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r backend/requirements.txt
+
+      - name: Run Pytest
+        env:
+          DATABASE_URL: postgresql://peblo_admin:peblo_secret_pass@localhost:5432/peblo_tv_db
+          SECRET_KEY: super-secret-development-key-change-in-production-32-chars-min
+          STORAGE_TYPE: local
+          STORAGE_PATH: ${{ github.workspace }}/storage
+          CATALOGUE_PATH: ${{ github.workspace }}/storage/catalogue.json
+        run: |
+          cd backend
+          pytest -v
+
+  cms-check:
+    name: CMS Frontend Check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: cms/package.json
+
+      - name: Install CMS Dependencies
+        run: |
+          cd cms
+          npm ci
+
+      - name: TypeScript & Build Check
+        run: |
+          cd cms
+          npm run build
+
+  viewer-check:
+    name: Viewer Frontend Check & Build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+          cache-dependency-path: viewer/package.json
+
+      - name: Install Viewer Dependencies
+        run: |
+          cd viewer
+          npm ci
+
+      - name: TypeScript & Build Check
+        run: |
+          cd viewer
+          npm run build
+
+  docker-build:
+    name: Docker Compose Build Verification
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker Compose Stack
+        run: |
+          docker-compose build

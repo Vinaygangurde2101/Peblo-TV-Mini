@@ -1,0 +1,115 @@
+[
+  {
+    "title": "Breaking Badlands",
+    "synopsis": "A high school chemistry teacher turned methamphetamine producer partners with a former student in a high-stakes struggle for power.",
+    "category": "Crime",
+    "section": "Trending Now",
+    "status": "published",
+    "poster_url": "/static/artwork/breaking_badlands_poster.jpg",
+    "banner_url": "/static/artwork/breaking_badlands_banner.jpg",
+    "seasons": [
+      {
+        "season_number": 0,
+        "title": "Trailers & Teasers",
+        "status": "published",
+        "episodes": [
+          {
+            "episode_number": 1,
+            "title": "Official Season 1 Trailer",
+            "synopsis": "First look trailer for Breaking Badlands.",
+            "duration_seconds": 120,
+            "content_group": "bb-trailer-01",
+            "language": "English",
+            "status": "published",
+            "thumbnail_url": "/static/artwork/bb_trailer_thumb.jpg"
+          }
+        ]
+      },
+      {
+        "season_number": 1,
+        "title": "Season 1",
+        "status": "published",
+        "episodes": [
+          {
+            "episode_number": 1,
+            "title": "Pilot",
+            "synopsis": "Diagnosed with terminal lung cancer, Walter decision to enter the drug trade.",
+            "duration_seconds": 3480,
+            "content_group": "bb-ep-101",
+            "language": "English",
+            "status": "published",
+            "thumbnail_url": "/static/artwork/bb_101_thumb.jpg"
+          },
+          {
+            "episode_number": 1,
+            "title": "Pilot (Hindi Dub)",
+            "synopsis": "Walter decides to join drug trade - Hindi dub.",
+            "duration_seconds": 3480,
+            "content_group": "bb-ep-101",
+            "language": "Hindi",
+            "status": "published",
+            "thumbnail_url": "/static/artwork/bb_101_thumb.jpg"
+          },
+          {
+            "episode_number": 2,
+            "title": "Cat's in the Bag...",
+            "synopsis": "Walt and Jesse attempt to dispose of two bodies.",
+            "duration_seconds": 2880,
+            "content_group": "bb-ep-102",
+            "language": "English",
+            "status": "published",
+            "thumbnail_url": "/static/artwork/bb_102_thumb.jpg"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "Cyberpunk 2099",
+    "synopsis": "A rogue mercenary navigates the neon-soaked underworld of a futuristic megacity.",
+    "category": "Sci-Fi",
+    "section": "New Releases",
+    "status": "published",
+    "poster_url": "/static/artwork/cyberpunk_poster.jpg",
+    "banner_url": "/static/artwork/cyberpunk_banner.jpg",
+    "seasons": [
+      {
+        "season_number": 1,
+        "title": "Season 1: Neo-Tokyo",
+        "status": "published",
+        "episodes": [
+          {
+            "episode_number": 1,
+            "title": "Neon Awakening",
+            "synopsis": "Kael wakes up in a cybernetics lab with missing memories.",
+            "duration_seconds": 3120,
+            "content_group": "cp-ep-101",
+            "language": "English",
+            "status": "published",
+            "thumbnail_url": "/static/artwork/cp_101_thumb.jpg"
+          },
+          {
+            "episode_number": 2,
+            "title": "Ghost in the Wire",
+            "synopsis": "A hack goes wrong in the central databank.",
+            "duration_seconds": null,
+            "content_group": "cp-ep-102",
+            "language": "English",
+            "status": "published",
+            "thumbnail_url": null
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "title": "The Royal Gambit",
+    "synopsis": "Orphaned chess prodigy Beth Harmon struggles with addiction on her rise to world champion.",
+    "category": "Drama",
+    "section": "Popular Dramas",
+    "status": "draft",
+    "poster_url": null,
+    "banner_url": null,
+    "seasons": []
+  }
+]
