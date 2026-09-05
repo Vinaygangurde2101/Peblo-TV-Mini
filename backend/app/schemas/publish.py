@@ -25,3 +25,22 @@ class PublishRunResponse(BaseModel):
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PublishDryRunResponse(BaseModel):
+    is_publishable: bool
+    added_shows: List[str]
+    modified_shows: List[str]
+    removed_shows: List[str]
+    total_shows_candidate: int
+    total_episodes_candidate: int
+    validation_blockers_count: int
+
+
+class RollbackResponse(BaseModel):
+    publish_run_id: str
+    rolled_back_to_run_id: str
+    status: PublishStatus
+    show_count: int
+    episode_count: int
+    message: str

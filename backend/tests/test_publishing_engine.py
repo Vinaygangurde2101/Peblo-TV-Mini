@@ -128,3 +128,69 @@ def test_successful_atomic_publishing_flow(client, admin_user, db):
     assert "English" in grouped_ep["languages"]
     assert "Hindi" in grouped_ep["languages"]
     assert len(grouped_ep["variants"]) == 2
+
+
+def test_dry_run_publish_diff(client, editor_user):
+    headers = get_headers(editor_user)
+    response = client.post("/admin/catalog/publish/dry-run", headers=headers)
+    assert response.status_code == 200
+    data = response.json()
+    assert "is_publishable" in data
+    assert "added_shows" in data
+    assert "modified_shows" in data
+    assert "removed_shows" in data
+
+
+def test_catalog_rollback(client, admin_user, db):
+    headers = get_headers(admin_user)
+    db.query(Show).update({"status": ContentStatus.DRAFT})
+    db.commit()
+
+    artwork_dir = os.path.join(settings.STORAGE_PATH, "artwork")
+    os.makedirs(artwork_dir, exist_ok=True)
+    poster_file = os.path.join(artwork_dir, "rollback_poster.jpg")
+    thumb_file = os.path.join(artwork_dir, "rollback_thumb.jpg")
+    with open(poster_file, "w") as f:
+        f.write("fake_img_data")
+    with open(thumb_file, "w") as f:
+        f.write("fake_img_data")
+
+    show = Show(
+        title="Rollback Test Show",
+        synopsis="Rollback synopsis",
+        category="Drama",
+        section="Featured",
+        status=ContentStatus.PUBLISHED,
+        poster_url="/static/artwork/rollback_poster.jpg"
+    )
+    db.add(show)
+    db.commit()
+
+    season = Season(show_id=show.id, season_number=1, title="Season 1", status=ContentStatus.PUBLISHED)
+    db.add(season)
+    db.commit()
+
+    episode = Episode(
+        season_id=season.id,
+        episode_number=1,
+        title="Episode 1",
+        content_group="rollback-ep-1",
+        language="English",
+        duration_seconds=1200,
+        thumbnail_url="/static/artwork/rollback_thumb.jpg",
+        status=ContentStatus.PUBLISHED
+    )
+    db.add(episode)
+    db.commit()
+
+    # 1. Execute initial publish
+    pub_res = client.post("/admin/catalog/publish", headers=headers)
+    assert pub_res.status_code == 200
+    run_id = pub_res.json()["publish_run_id"]
+
+    # 2. Rollback to that publish run
+    rollback_res = client.post(f"/admin/catalog/rollback/{run_id}", headers=headers)
+    assert rollback_res.status_code == 200
+    rb_data = rollback_res.json()
+    assert rb_data["status"] == "success"
+    assert rb_data["rolled_back_to_run_id"] == run_id

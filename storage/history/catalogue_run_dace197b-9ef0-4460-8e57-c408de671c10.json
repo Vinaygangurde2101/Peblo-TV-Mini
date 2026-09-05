@@ -1,0 +1,153 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-09-05T19:12:19.932087+00:00",
+  "total_shows": 1,
+  "total_episodes": 3,
+  "sections": [
+    {
+      "name": "Trending Now",
+      "shows": [
+        {
+          "id": "10df87f2-a675-4af8-b7da-e164ca76e68f",
+          "title": "E2E Platform Masterpiece",
+          "synopsis": "End to end integration test show.",
+          "category": "Drama",
+          "section": "Trending Now",
+          "poster_url": "/static/artwork/e2e_poster.jpg",
+          "banner_url": null,
+          "seasons": [
+            {
+              "id": "9f2a42a6-c6da-48bb-9977-e0604acc37c3",
+              "season_number": 1,
+              "title": "Season 1",
+              "episodes": [
+                {
+                  "content_group": "e2e-ep-101",
+                  "episode_number": 1,
+                  "title": "Pilot Episode",
+                  "synopsis": null,
+                  "duration_seconds": 3200,
+                  "poster_url": null,
+                  "banner_url": null,
+                  "thumbnail_url": "/static/artwork/e2e_thumb.jpg",
+                  "languages": [
+                    "English",
+                    "Hindi"
+                  ],
+                  "variants": [
+                    {
+                      "language": "English",
+                      "title": "Pilot Episode",
+                      "duration_seconds": 3200,
+                      "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+                    },
+                    {
+                      "language": "Hindi",
+                      "title": "Pilot Episode (Hindi Dub)",
+                      "duration_seconds": 3200,
+                      "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "trailers": [
+            {
+              "content_group": "e2e-trailer-1",
+              "episode_number": 1,
+              "title": "Official Teaser",
+              "synopsis": null,
+              "duration_seconds": 90,
+              "poster_url": null,
+              "banner_url": null,
+              "thumbnail_url": "/static/artwork/e2e_thumb.jpg",
+              "languages": [
+                "English"
+              ],
+              "variants": [
+                {
+                  "language": "English",
+                  "title": "Official Teaser",
+                  "duration_seconds": 90,
+                  "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "shows": [
+    {
+      "id": "10df87f2-a675-4af8-b7da-e164ca76e68f",
+      "title": "E2E Platform Masterpiece",
+      "synopsis": "End to end integration test show.",
+      "category": "Drama",
+      "section": "Trending Now",
+      "poster_url": "/static/artwork/e2e_poster.jpg",
+      "banner_url": null,
+      "seasons": [
+        {
+          "id": "9f2a42a6-c6da-48bb-9977-e0604acc37c3",
+          "season_number": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "content_group": "e2e-ep-101",
+              "episode_number": 1,
+              "title": "Pilot Episode",
+              "synopsis": null,
+              "duration_seconds": 3200,
+              "poster_url": null,
+              "banner_url": null,
+              "thumbnail_url": "/static/artwork/e2e_thumb.jpg",
+              "languages": [
+                "English",
+                "Hindi"
+              ],
+              "variants": [
+                {
+                  "language": "English",
+                  "title": "Pilot Episode",
+                  "duration_seconds": 3200,
+                  "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+                },
+                {
+                  "language": "Hindi",
+                  "title": "Pilot Episode (Hindi Dub)",
+                  "duration_seconds": 3200,
+                  "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "trailers": [
+        {
+          "content_group": "e2e-trailer-1",
+          "episode_number": 1,
+          "title": "Official Teaser",
+          "synopsis": null,
+          "duration_seconds": 90,
+          "poster_url": null,
+          "banner_url": null,
+          "thumbnail_url": "/static/artwork/e2e_thumb.jpg",
+          "languages": [
+            "English"
+          ],
+          "variants": [
+            {
+              "language": "English",
+              "title": "Official Teaser",
+              "duration_seconds": 90,
+              "thumbnail_url": "/static/artwork/e2e_thumb.jpg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

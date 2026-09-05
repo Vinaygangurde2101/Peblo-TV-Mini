@@ -6,8 +6,18 @@ from app.db.session import get_db
 from app.auth.dependencies import get_current_admin, get_current_editor_or_admin
 from app.models.user import User
 from app.models.publish_run import PublishRun
-from app.schemas.publish import PublishResponse, PublishRunResponse
-from app.services.publishing.engine import execute_catalogue_publish, PublishValidationError
+from app.schemas.publish import (
+    PublishResponse,
+    PublishRunResponse,
+    PublishDryRunResponse,
+    RollbackResponse
+)
+from app.services.publishing.engine import (
+    execute_catalogue_publish,
+    generate_publish_dry_run,
+    execute_catalogue_rollback,
+    PublishValidationError
+)
 
 router = APIRouter(prefix="/admin", tags=["Admin Publishing"])
 
@@ -39,6 +49,46 @@ def publish_catalog(
                 "message": "Publishing blocked by validation errors.",
                 "report": e.validation_report.model_dump()
             }
+        )
+
+
+@router.post("/catalog/publish/dry-run", response_model=PublishDryRunResponse)
+def dry_run_publish_catalog(
+    current_user: User = Depends(get_current_editor_or_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Generates a publish diff preview without altering live catalogue.json.
+    ACCESSIBLE TO EDITORS AND ADMINS.
+    """
+    diff_data = generate_publish_dry_run(db)
+    return PublishDryRunResponse(**diff_data)
+
+
+@router.post("/catalog/rollback/{run_id}", response_model=RollbackResponse)
+def rollback_catalog(
+    run_id: str,
+    current_user: User = Depends(get_current_admin),
+    db: Session = Depends(get_db)
+):
+    """
+    Rolls back the live catalogue.json to a historical versioned snapshot.
+    RESTRICTED TO ADMIN ROLE ONLY.
+    """
+    try:
+        rollback_run = execute_catalogue_rollback(db, run_id, current_user.id)
+        return RollbackResponse(
+            publish_run_id=rollback_run.id,
+            rolled_back_to_run_id=run_id,
+            status=rollback_run.status,
+            show_count=rollback_run.show_count,
+            episode_count=rollback_run.episode_count,
+            message=f"Catalogue successfully rolled back to publish run {run_id}."
+        )
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e)
         )
 
 

@@ -1,0 +1,153 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-09-05T19:12:20.823898+00:00",
+  "total_shows": 1,
+  "total_episodes": 3,
+  "sections": [
+    {
+      "name": "Trending Now",
+      "shows": [
+        {
+          "id": "ad968a71-864e-4d08-800f-e463265509f6",
+          "title": "Breaking Badlands Test",
+          "synopsis": "Testing synopsis",
+          "category": "Crime",
+          "section": "Trending Now",
+          "poster_url": "/static/artwork/test_poster.jpg",
+          "banner_url": null,
+          "seasons": [
+            {
+              "id": "b056079d-29e2-4135-a915-51ae48d43642",
+              "season_number": 1,
+              "title": "Season 1",
+              "episodes": [
+                {
+                  "content_group": "test-ep-101",
+                  "episode_number": 1,
+                  "title": "Pilot",
+                  "synopsis": null,
+                  "duration_seconds": 3000,
+                  "poster_url": null,
+                  "banner_url": null,
+                  "thumbnail_url": "/static/artwork/test_thumb.jpg",
+                  "languages": [
+                    "English",
+                    "Hindi"
+                  ],
+                  "variants": [
+                    {
+                      "language": "English",
+                      "title": "Pilot",
+                      "duration_seconds": 3000,
+                      "thumbnail_url": "/static/artwork/test_thumb.jpg"
+                    },
+                    {
+                      "language": "Hindi",
+                      "title": "Pilot (Hindi)",
+                      "duration_seconds": 3000,
+                      "thumbnail_url": "/static/artwork/test_thumb.jpg"
+                    }
+                  ]
+                }
+              ]
+            }
+          ],
+          "trailers": [
+            {
+              "content_group": "test-trailer-01",
+              "episode_number": 1,
+              "title": "Official Teaser",
+              "synopsis": null,
+              "duration_seconds": 60,
+              "poster_url": null,
+              "banner_url": null,
+              "thumbnail_url": "/static/artwork/test_thumb.jpg",
+              "languages": [
+                "English"
+              ],
+              "variants": [
+                {
+                  "language": "English",
+                  "title": "Official Teaser",
+                  "duration_seconds": 60,
+                  "thumbnail_url": "/static/artwork/test_thumb.jpg"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "shows": [
+    {
+      "id": "ad968a71-864e-4d08-800f-e463265509f6",
+      "title": "Breaking Badlands Test",
+      "synopsis": "Testing synopsis",
+      "category": "Crime",
+      "section": "Trending Now",
+      "poster_url": "/static/artwork/test_poster.jpg",
+      "banner_url": null,
+      "seasons": [
+        {
+          "id": "b056079d-29e2-4135-a915-51ae48d43642",
+          "season_number": 1,
+          "title": "Season 1",
+          "episodes": [
+            {
+              "content_group": "test-ep-101",
+              "episode_number": 1,
+              "title": "Pilot",
+              "synopsis": null,
+              "duration_seconds": 3000,
+              "poster_url": null,
+              "banner_url": null,
+              "thumbnail_url": "/static/artwork/test_thumb.jpg",
+              "languages": [
+                "English",
+                "Hindi"
+              ],
+              "variants": [
+                {
+                  "language": "English",
+                  "title": "Pilot",
+                  "duration_seconds": 3000,
+                  "thumbnail_url": "/static/artwork/test_thumb.jpg"
+                },
+                {
+                  "language": "Hindi",
+                  "title": "Pilot (Hindi)",
+                  "duration_seconds": 3000,
+                  "thumbnail_url": "/static/artwork/test_thumb.jpg"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "trailers": [
+        {
+          "content_group": "test-trailer-01",
+          "episode_number": 1,
+          "title": "Official Teaser",
+          "synopsis": null,
+          "duration_seconds": 60,
+          "poster_url": null,
+          "banner_url": null,
+          "thumbnail_url": "/static/artwork/test_thumb.jpg",
+          "languages": [
+            "English"
+          ],
+          "variants": [
+            {
+              "language": "English",
+              "title": "Official Teaser",
+              "duration_seconds": 60,
+              "thumbnail_url": "/static/artwork/test_thumb.jpg"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

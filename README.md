@@ -184,7 +184,22 @@ For initial deployment scale, PostgreSQL queries with composite indexes (`idx_sh
 
 ---
 
-## 9. Testing & Quality Assurance
+## 9. Optional Stretch Features Implemented (Section 8)
+
+The following optional stretch features specified in Section 8 of the challenge PDF have been fully implemented and tested:
+
+1. **Versioned Catalogue & One-Click Rollback**:
+   - Every publish run generates an immutable snapshot stored in `storage/history/catalogue_run_<id>.json`.
+   - Admins can execute `POST /admin/catalog/rollback/{run_id}` or click **Rollback** in the CMS Publish History table to instantly restore any historic catalogue version live.
+2. **Publish Dry-Run & Visual Diff Preview**:
+   - `POST /admin/catalog/publish/dry-run` calculates a diff preview between draft DB content and the live published snapshot without altering storage.
+   - CMS displays a visual diff breakdown of **Added Shows**, **Modified Shows**, and **Removed Shows**.
+3. **Netflix-Style Image Skeleton Loaders**:
+   - Added `@keyframes shimmer` skeleton animation to the Viewer UI for smooth image load handling.
+
+---
+
+## 10. Testing & Quality Assurance
 
 Run the comprehensive Python test suite inside Docker:
 
@@ -192,18 +207,18 @@ Run the comprehensive Python test suite inside Docker:
 docker-compose exec backend pytest -v
 ```
 
-Covered Scenarios:
+Covered Scenarios (18/18 Passing):
 - `test_auth.py`: JWT login and role verification.
 - `test_artwork_validation.py`: PIL dimension, aspect ratio, file size, and path traversal checks.
 - `test_crud_apis.py`: Shows/Episodes CRUD and 409 Conflict handling.
 - `test_validation_report.py`: Pre-flight audit detection.
-- `test_publishing_engine.py`: Atomic replacement, Season 0 exclusion, language grouping.
+- `test_publishing_engine.py`: Atomic replacement, Season 0 exclusion, language grouping, **Dry-Run Diff calculation**, and **Snapshot Rollback**.
 - `test_catalogue_api.py`: Public read decoupling and composed search filters.
 - `test_e2e_integration.py`: End-to-end platform workflow lifecycle.
 
 ---
 
-## 10. AI Usage Disclosure
+## 11. AI Usage Disclosure
 
 In compliance with challenge requirements, AI development assistants were utilized during the project lifecycle:
 - AI tools were used as pair-programming assistants for initial boilerplate scaffolding, typing signatures, unit test generation, and documentation formatting.
@@ -211,19 +226,21 @@ In compliance with challenge requirements, AI development assistants were utiliz
 
 ---
 
-## 11. Screen-Recording & Demo Flow Checklist
+## 12. Screen-Recording & Demo Flow Checklist
 
 When recording a demo video for submission:
 1. **CMS Login**: Log in as `editor@peblo.tv` -> verify `EDITOR` badge displayed.
 2. **Create Show**: Create a new show, upload poster/banner artwork -> observe live artwork preview.
 3. **Attempt Publish as Editor**: Navigate to `/publish` -> observe permission restricted callout.
 4. **Login as Admin**: Log in as `admin@peblo.tv` -> navigate to `/validation` -> view readiness report.
-5. **Publish Catalogue**: Click "Publish Catalogue Now" -> observe successful publish run recorded in history.
-6. **Viewer Experience**: Open `http://localhost:3001` -> observe new show on home feed, verify Season 0 trailers section, and filter by language variants.
+5. **Dry-Run Diff**: Click "Preview Diff (Dry Run)" -> view added/modified/removed show diff.
+6. **Publish Catalogue**: Click "Publish Catalogue Now" -> observe successful publish run recorded in history.
+7. **Rollback Feature**: Click "Rollback" on a past history run -> verify catalogue restored.
+8. **Viewer Experience**: Open `http://localhost:3001` -> observe new show on home feed, verify Season 0 trailers section, and filter by language variants.
 
 ---
 
-## 12. Part E — Technical Trade-Offs & Written Responses
+## 13. Part E — Technical Trade-Offs & Written Responses
 
 ### 1. How Publishing Was Made Atomic (and Crash Handling)
 - **Implementation**: The publishing engine generates candidate JSON in a unique temporary file (`catalogue.json.tmp.<uuid>`) in the storage volume. Once formatting and disk writing complete, an atomic file rename (`os.replace`) swaps the temporary file into place over `catalogue.json`.
