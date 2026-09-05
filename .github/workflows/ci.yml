@@ -21,7 +21,7 @@ jobs:
         ports:
           - 5432:5432
         options: >-
-          --health-cmd pg_isready
+          --health-cmd "pg_isready -U peblo_admin -d peblo_tv_db"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
@@ -34,6 +34,7 @@ jobs:
         with:
           python-version: '3.11'
           cache: 'pip'
+          cache-dependency-path: backend/requirements.txt
 
       - name: Install Backend Dependencies
         run: |
@@ -63,7 +64,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: cms/package.json
+          cache-dependency-path: cms/package-lock.json
 
       - name: Install CMS Dependencies
         run: |
@@ -86,7 +87,7 @@ jobs:
         with:
           node-version: '20'
           cache: 'npm'
-          cache-dependency-path: viewer/package.json
+          cache-dependency-path: viewer/package-lock.json
 
       - name: Install Viewer Dependencies
         run: |
