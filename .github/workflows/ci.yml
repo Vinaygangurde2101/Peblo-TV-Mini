@@ -47,9 +47,10 @@ jobs:
           STORAGE_TYPE: local
           STORAGE_PATH: ${{ github.workspace }}/storage
           CATALOGUE_PATH: ${{ github.workspace }}/storage/catalogue.json
+          PYTHONPATH: .
         run: |
           cd backend
-          pytest -v
+          python -m pytest -v
 
   cms-check:
     name: CMS Frontend Check & Build
