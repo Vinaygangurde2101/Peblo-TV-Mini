@@ -9,12 +9,18 @@ from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.auth.password import hash_password
 
-# In-memory SQLite database for fast isolated unit tests
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+from app.core.config import settings
 
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
-)
+SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+
+is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
+engine_kwargs = {}
+if is_sqlite:
+    engine_kwargs["connect_args"] = {"check_same_thread": False}
+else:
+    engine_kwargs.update({"pool_pre_ping": True})
+
+engine = create_engine(SQLALCHEMY_DATABASE_URL, **engine_kwargs)
 TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
