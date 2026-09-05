@@ -24,6 +24,7 @@ wheels/
 venv/
 ENV/
 .pytest_cache/
+*.db
 
 # Secrets & Local Config
 .env

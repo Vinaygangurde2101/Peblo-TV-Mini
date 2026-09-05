@@ -105,4 +105,4 @@ jobs:
 
       - name: Build Docker Compose Stack
         run: |
-          docker-compose build
+          docker compose build
