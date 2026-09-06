@@ -8,7 +8,7 @@ The solution consists of three core application layers and an underlying automat
 1. Backend API (FastAPI + PostgreSQL + SQLAlchemy): Manages editorial data, enforces artwork specifications, runs content validation audits, and builds published static catalogue snapshots.
 2. Internal CMS (React + TypeScript + Vite): A dedicated content management dashboard for editors and admins to manage shows, seasons, episodes, upload artwork with live validation, preview dry-run diffs, and execute catalog publishes.
 3. Viewer UI (React + TypeScript + Vite): A responsive, Netflix-style web app for end-users that reads exclusively from the published static catalogue read-model.
-4. Pipeline & Operability: Fully containerized using Docker Compose, covered by automated Pytest suites, and integrated with GitHub Actions CI/CD workflows.
+4. Pipeline & Operability: Containerized via Docker Compose, covered by Pytest unit suites, and integrated with GitHub Actions CI/CD workflows.
 
 ---
 
@@ -19,7 +19,7 @@ The solution consists of three core application layers and an underlying automat
 | Part A — Backend API & DB Schema | ~4 hours | PostgreSQL schema, SQLAlchemy models, JWT auth, RBAC guards, PIL artwork validation, publishing engine, and API routes. |
 | Part B — Internal CMS Dashboard | ~3.5 hours | Show/episode CRUD, 3-slot artwork uploaders with live aspect ratio validation, validation report view, dry-run diff modal. |
 | Part C — Netflix-Style Viewer UI | ~3 hours | Hero banner, horizontal section carousels, Season 0 trailer isolation, search/filter, shimmer skeleton loaders. |
-| Part D — Pipeline & Operability | ~2 hours | Docker Compose configuration, environment setup, health endpoints, GitHub Actions CI workflow. |
+| Part D — Pipeline & Operability | ~2 hours | Docker Compose configuration, environment setup, health endpoints, GitHub Actions CI workflow, secret management reasoning. |
 | Part E — Written Engineering & Trade-offs | ~1.5 hours | Deep-dive documentation on atomic file replacement, storage abstraction, search scaling, and static read-models. |
 | Optional Stretch Features | ~2 hours | Implemented catalogue versioning, one-click rollback engine, and publish dry-run diff generator. |
 | Total | ~16 hours | |
@@ -55,9 +55,9 @@ docker compose up --build
 
 ---
 
-## Architecture & System Design
+## Architecture & Domain Conventions
 
-### 1. Separation of Editorial DB vs. Public Read Model
+### 1. Editorial Database vs. Published Read Model
 Instead of querying PostgreSQL directly on every public viewer request, the system is separated into two distinct storage tiers:
 - Editorial Database (PostgreSQL 16): Serves as the source of truth for internal content editors. It supports draft states, validation flags, multi-language variants, and audit trails.
 - Published Read Model (`storage/catalogue.json`): An optimized, static JSON document created by the publishing engine. The public Viewer UI reads only this file (or via `/api/v1/catalog`), ensuring viewer traffic spikes never lock database rows or slow down internal CMS editing.
@@ -86,6 +86,10 @@ Instead of querying PostgreSQL directly on every public viewer request, the syst
 └──────────────────────────┘                   └────────────────────┘
 ```
 
+### 2. Core Business Conventions (reference.json)
+- Season 0 Reserved for Trailers: Season 0 is strictly treated as promotional content. It is excluded from regular season listings in the Viewer UI and rendered separately under a dedicated Trailers section.
+- Content Group Aggregation: Episodes sharing the same `content_group` identifier represent language variants of the same logical episode (e.g., English/Hindi). The publishing engine collapses them into a single catalogue entry listing all available languages and video sources.
+
 ---
 
 ## Artwork Validation Specification
@@ -108,6 +112,23 @@ JWT-based authentication (HS256) is implemented with strict role enforcement:
 - `editor` Role: Can read and mutate shows, seasons, episodes, and upload artwork files.
 - `admin` Role: Inherits all editor permissions and is uniquely authorized to execute `POST /admin/catalog/publish`, perform dry-run diffs, and invoke snapshot rollbacks.
 - Role checking is enforced via FastAPI security dependencies (`require_roles([UserRole.ADMIN])`), returning HTTP 403 Forbidden if an editor attempts administrative operations.
+
+---
+
+## Pipeline & Operability (Part D Requirements)
+
+### 1. GitHub Actions CI/CD & Deploy Step Explanation
+The repository includes a GitHub Actions workflow (`.github/workflows/ci.yml`) triggering on pushes to `main` and pull requests:
+- Continuous Integration: Installs Python dependencies, executes `flake8` linting, runs Pytest unit tests, and builds production Docker images.
+- Deployment Strategy (Explained): In a production environment, the deployment step builds and pushes tagged Docker images to AWS ECR / Cloudflare Registry, then triggers a rolling deployment to AWS ECS / Cloud Run. The database migrations (`alembic upgrade head`) execute prior to traffic cutover, ensuring zero downtime.
+
+### 2. Secret Management in Production
+Environment variables are defined in `.env.example` covering database URLs, JWT secret keys, storage paths, and environment settings.
+- Production Strategy: Never commit `.env` files. In production, secrets are stored in a dedicated secret store (e.g., AWS Secrets Manager, HashiCorp Vault, or Doppler) and injected into container environments at runtime via KMS-encrypted variables or Kubernetes Secret mounts.
+
+### 3. Health Endpoint & Production Alerting
+- Health Endpoint (`GET /api/v1/health`): Returns JSON health status indicating backend, database connection, and storage volume availability (`{"status": "ok", "database": "connected", "storage": "healthy"}`).
+- Production Alerting: I would configure an alert on consecutive failed catalogue publish runs (`PublishRun.status == 'FAILED'`). Reasoning: A failed publish run directly blocks content managers from releasing new shows and could indicate storage disk exhaustion or database corruption. Alerting via PagerDuty/Slack ensures instant platform engineer intervention before end-users notice missing content.
 
 ---
 
