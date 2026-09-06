@@ -253,14 +253,14 @@ When recording a demo video for submission:
   2. Update `get_storage_service()` in `app/storage/factory.py` to instantiate `CloudStorageService` when `STORAGE_TYPE="r2"`.
   3. No changes to controllers or business logic (`artwork.py`, `publishing.py`, `report.py`) are necessary since all endpoints interact strictly with `BaseStorageService`.
 
-### 4. Search Implementation & Scaling Limits
+### 3. Search Implementation & Scaling Limits
 - **Implementation**: The `GET /catalog/search` endpoint performs composed filtering across show titles, synopsis, categories, sections, and language variants directly on the loaded `catalogue.json`.
 - **Scale Limits**: Performs sub-10ms for catalogues up to ~10,000 items. At 100,000+ items, linear in-memory JSON scanning introduces memory and CPU bottlenecks.
 - **Next Steps for Scale**:
   1. Enable PostgreSQL `pg_trgm` extension with GIN indexes on show and episode title columns for database search.
   2. For enterprise scale (1M+ catalog items), ingest published catalogue snapshots into Elasticsearch / OpenSearch with multi-facet filtering and fuzzy query matching.
 
-### 5. Serving Pre-Published Catalogue vs Direct DB Queries
+### 4. Serving Pre-Published Catalogue vs Direct DB Queries
 - **Benefits**:
   - **Scale & Isolation**: Serving static JSON (or caching via CDN Edge) handles millions of concurrent requests with near-zero database load. Public viewer traffic spikes cannot impact internal CMS performance.
   - **Atomic Consistency**: Guarantee that viewers only see fully validated, published content snapshots.
@@ -268,7 +268,7 @@ When recording a demo video for submission:
   - **Eventual Consistency**: CMS edits are not instantly visible in the public viewer until an explicit publish run is completed by an Admin.
   - **Payload Size**: A monolithic static JSON file grows in size over time unless split into section/category pages.
 
-### 6. Scope Trade-offs & AI Usage Disclosure
+### 5. Scope Trade-offs & AI Usage Disclosure
 - **Skipped Features**: Cloudflare R2 live infrastructure provision (abstracted via `BaseStorageService`), and real-time video transcoding (focused strictly on image artwork validation and catalog publishing per requirements).
 - **AI Tool Usage**: AI development assistants (Gemini 3.6 Flash / Antigravity) were used as pair-programming tools for scaffolding schemas, typing signatures, writing initial unit test stubs, and formatting documentation.
 - **Output Review**: All generated logic was thoroughly reviewed, refactored (e.g., adding explicit `os.replace` atomic guarantees, guard checks for `str | None` types, and strict RBAC dependencies), and validated against unit/E2E test suites.
