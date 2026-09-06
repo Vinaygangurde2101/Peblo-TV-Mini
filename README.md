@@ -1,275 +1,211 @@
 # Peblo TV Mini — OTT Media Platform & Publishing Engine
 
-[![CI/CD Pipeline](https://github.com/peblo/peblo-tv-mini/actions/workflows/ci.yml/badge.svg)](https://github.com/peblo/peblo-tv-mini/actions)
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![FastAPI](https://img.shields.io/badge/FastAPI-0.110.0-green)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-blue)
-![React](https://img.shields.io/badge/React-18-blue)
-![Docker](https://img.shields.io/badge/Docker-Compose-blue)
+[![CI/CD Pipeline](https://github.com/Vinaygangurde2101/Peblo-TV-Mini/actions/workflows/ci.yml/badge.svg)](https://github.com/Vinaygangurde2101/Peblo-TV-Mini/actions)
 
-A production-grade, human-written OTT media management platform and public catalogue streaming engine built with Python, FastAPI, PostgreSQL, SQLAlchemy, React, TypeScript, and Docker.
+Hi there! Welcome to my implementation of **Peblo TV Mini**. This project is a complete end-to-end miniature OTT media platform built for Peblo's Full-Stack Platform Engineer take-home challenge.
 
----
-
-## 1. System Architecture Overview
-
-Peblo TV Mini employs a **Modular Monolith** pattern with explicit separation of concerns:
-
-```
-                                  +-----------------------+
-                                  |     Admin User /      |
-                                  |    Content Editor     |
-                                  +-----------------------+
-                                              |
-                                              v
-                                  +-----------------------+
-                                  |    CMS React App      |
-                                  |    (Port 3000)        |
-                                  +-----------------------+
-                                              |
-                                              v  REST / JSON (JWT Auth)
-                                  +-----------------------+
-                                  |    FastAPI Backend    |
-                                  |    (Port 8000)        |
-                                  +-----------------------+
-                                     /                 \
-                                    /                   \
-                                   v                     v
-                        +--------------------+   +---------------------+
-                        | PostgreSQL 16 DB   |   | Atomic Publisher    |
-                        | (Editorial State)  |   | Engine (os.replace) |
-                        +--------------------+   +---------------------+
-                                                            |
-                                                            v Writes Snapshot
-                                                 +---------------------+
-                                                 | storage/            |
-                                                 |   catalogue.json    |
-                                                 +---------------------+
-                                                            ^
-                                                            | Reads Snapshot
-                                                 +---------------------+
-                                                 |  Viewer React App   |
-                                                 |    (Port 3001)      |
-                                                 +---------------------+
-                                                            ^
-                                                            |
-                                                  +-------------------+
-                                                  |   Public Viewer   |
-                                                  +-------------------+
-```
-
-### Key Architectural Patterns
-1. **Editorial Database vs. Published Read Model**:
-   - **PostgreSQL Database**: Holds live editorial content (shows, seasons, episodes, artwork URLs, draft states, user accounts, publish audit logs).
-   - **Published `catalogue.json` Snapshot**: Serves as the static read model consumed exclusively by the public **Viewer application**.
-2. **Atomic Catalogue Publishing**:
-   - The publisher writes candidate JSON to temporary storage (`catalogue.json.tmp.<uuid>`), validates file integrity, and executes an atomic OS replacement (`os.replace`). Readers will strictly encounter either the **OLD VALID CATALOGUE** or the **NEW VALID CATALOGUE**, with zero partial write windows.
-3. **Multi-Language Episode Aggregation**:
-   - Episodes sharing the same `content_group` key (e.g. `ep-101`) are merged into a single catalogue episode entry containing `languages: ["English", "Hindi", "Spanish"]` and language variant metadata.
-4. **Season 0 Exclusion**:
-   - Season 0 is reserved for promotional teasers and trailers. The publisher strips Season 0 out of standard viewer season listings and nests them separately under a `trailers` metadata block.
+The solution consists of three core application layers and an underlying automated pipeline:
+1. **Backend API (FastAPI + PostgreSQL + SQLAlchemy)**: Manages editorial data, enforces artwork specifications, runs content validation audits, and builds published static catalogue snapshots.
+2. **Internal CMS (React + TypeScript + Vite)**: A dedicated content management dashboard for editors and admins to manage shows, seasons, episodes, upload artwork with live validation, preview dry-run diffs, and execute catalog publishes.
+3. **Viewer UI (React + TypeScript + Vite)**: A responsive, Netflix-style web app for end-users that reads *exclusively* from the published static catalogue read-model.
+4. **Pipeline & Operability**: Fully containerized using `docker compose`, covered by automated Pytest suites, and integrated with GitHub Actions CI/CD workflows.
 
 ---
 
-## 2. Quick Start (Local Docker Setup)
+## ⏱️ Time Spent Breakdown
 
-Clone the repository and launch the full stack with Docker Compose:
+| Component / Task | Time Spent | Focus Areas |
+| :--- | :--- | :--- |
+| **Part A — Backend API & DB Schema** | ~4 hours | PostgreSQL schema, SQLAlchemy models, JWT auth, RBAC guards, PIL artwork validation, publishing engine, and API routes. |
+| **Part B — Internal CMS Dashboard** | ~3.5 hours | Show/episode CRUD, 3-slot artwork uploaders with live aspect ratio validation, validation report view, dry-run diff modal. |
+| **Part C — Netflix-Style Viewer UI** | ~3 hours | Hero banner, horizontal section carousels, Season 0 trailer isolation, search/filter, shimmer skeleton loaders. |
+| **Part D — Pipeline & Operability** | ~2 hours | `docker-compose.yml`, environment configuration, health endpoints, GitHub Actions CI workflow setup. |
+| **Part E — Written Engineering & Trade-offs** | ~1.5 hours | Deep-dive documentation on atomic file replacement, storage abstraction, search scaling, and pre-published static read-models. |
+| **Optional Stretch Features** | ~2 hours | Implemented catalogue versioning, one-click rollback engine, and publish dry-run diff generator. |
+| **Total** | **~16 hours** | |
+
+---
+
+## 🚀 Quick Start (Docker Compose)
+
+The entire platform can be brought up with a single command using Docker Compose:
 
 ```bash
-# 1. Clone repository
-git clone https://github.com/user/peblo-tv-mini.git
-cd peblo-tv-mini
+# 1. Clone the repository
+git clone https://github.com/Vinaygangurde2101/Peblo-TV-Mini.git
+cd Peblo-TV-Mini
 
-# 2. Start PostgreSQL, FastAPI Backend, CMS, and Viewer
-docker-compose up --build
+# 2. Build and start all services
+docker compose up --build
 ```
 
-### System Services
-- **FastAPI API & OpenAPI Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
-- **Admin CMS App**: [http://localhost:3000](http://localhost:3000)
-- **Public Viewer App**: [http://localhost:3001](http://localhost:3001)
+### Accessing the Applications:
+* **Admin CMS**: [http://localhost:3000](http://localhost:3000)
+* **Public Viewer UI**: [http://localhost:3001](http://localhost:3001)
+* **FastAPI Backend & Interactive Swagger Docs**: [http://localhost:8000/docs](http://localhost:8000/docs)
+* **Health Check**: [http://localhost:8000/api/v1/health](http://localhost:8000/api/v1/health)
 
-### Preset Credentials
-- **Admin Account** (Can manage content and execute catalogue publishing):
-  - Email: `admin@peblo.tv`
-  - Password: `admin123`
-- **Editor Account** (Can manage content and artwork; cannot publish catalogue):
-  - Email: `editor@peblo.tv`
-  - Password: `editor123`
+### Default Test Credentials:
+* **Admin Account** (Full CRUD + Publishing Rights + Rollback + Dry-Run):
+  * **Email**: `admin@peblo.tv`
+  * **Password**: `admin123`
+* **Editor Account** (Content CRUD + Artwork Uploads; restricted from publishing):
+  * **Email**: `editor@peblo.tv`
+  * **Password**: `editor123`
 
 ---
 
-## 3. Database Schema & Key Constraints
+## 🏗️ Architecture & Key System Design Decisions
 
-```sql
--- Unique constraint enforcing single language variant per logical content_group
-CONSTRAINT uq_episodes_content_group_language UNIQUE (content_group, language);
+### 1. Separation of Editorial DB vs. Public Read Model
+Instead of querying PostgreSQL directly on every public viewer request, I separated the system into two distinct storage tiers:
+* **Editorial Database (PostgreSQL 16)**: Serves as the source of truth for internal content editors. It supports draft states, validation flags, multi-language variants, and audit trails.
+* **Published Read Model (`storage/catalogue.json`)**: An optimized, static JSON document created by the publishing engine. The public Viewer UI reads *only* this file (or via the `/api/v1/catalog` endpoint), ensuring that viewer traffic spikes can never lock database rows or slow down internal CMS editing.
 
--- Unique constraint enforcing season number uniqueness per show
-CONSTRAINT uq_seasons_show_season_number UNIQUE (show_id, season_number);
 ```
-
-### Relational Hierarchy
-`Show` (1:N) -> `Season` (1:N) -> `Episode` (N:1) -> `content_group`
+┌──────────────────────────┐          REST / JWT
+│ Admin / Content Editor   ├──────────────────────────────┐
+└────────────┬─────────────┘                              │
+             │                                            ▼
+             │                                 ┌────────────────────┐
+             │                                 │   CMS React App    │
+             │                                 │    (Port 3000)     │
+             │                                 └──────────┬─────────┘
+             │                                            │ REST API
+             ▼                                            ▼
+┌──────────────────────────┐                   ┌────────────────────┐
+│  FastAPI Backend Engine  │◄──────────────────┤ PostgreSQL 16 DB   │
+│       (Port 8000)        │                   │  (Editorial State) │
+└────────────┬─────────────┘                   └────────────────────┘
+             │
+             │ Atomic Publish (os.replace)
+             ▼
+┌──────────────────────────┐                   ┌────────────────────┐
+│     storage/             │◄──────────────────┤  Viewer React App  │
+│   catalogue.json         │   Reads Snapshot  │    (Port 3001)     │
+└──────────────────────────┘                   └────────────────────┘
+```
 
 ---
 
-## 4. Artwork Validation Specification
+## 🎨 Artwork Validation Specification
 
-Backend and Frontend enforce image validation prior to persistence:
+Per the `reference.json` specification provided in the challenge, the backend enforces strict dimension, aspect ratio, and file size limits on artwork uploads using Python's `PIL` (Pillow) library:
 
-| Artwork Type | Required Dimensions | Aspect Ratio | Max File Size | Allowed Formats |
+| Artwork Surface | Dimension Spec | Allowed Aspect Ratio | Max File Size | Allowed Formats |
 | :--- | :--- | :--- | :--- | :--- |
-| **Poster** | ~ 600 x 900 px | 2:3 | 200 KB | JPEG, PNG, WebP |
-| **Banner** | 1280 x 720 px | 16:9 | 200 KB | JPEG, PNG, WebP |
-| **Thumbnail** | 640 x 360 px | 16:9 | 200 KB | JPEG, PNG, WebP |
+| **Poster** | ~600 × 900 px | 2:3 (±5% tolerance) | 200 KB | JPEG, PNG, WebP |
+| **Banner** | ~1280 × 720 px | 16:9 (±5% tolerance) | 200 KB | JPEG, PNG, WebP |
+| **Thumbnail** | ~640 × 360 px | 16:9 (±5% tolerance) | 200 KB | JPEG, PNG, WebP |
 
-Human-readable error callout example:
-> *"Poster must be approximately 600×900 pixels. Uploaded image is 800×400 pixels."*
-
----
-
-## 5. Storage Abstraction Layer
-
-The application interacts with storage through the `BaseStorageService` abstract class:
-
-```python
-class BaseStorageService(ABC):
-    @abstractmethod
-    def save(self, file_data: BinaryIO, filename: str, subfolder: str = "artwork") -> str: pass
-    @abstractmethod
-    def get(self, relative_path: str) -> Optional[bytes]: pass
-    @abstractmethod
-    def delete(self, relative_path: str) -> bool: pass
-    @abstractmethod
-    def exists(self, relative_path: str) -> bool: pass
-```
-
-- **Development/Docker**: Uses `LocalStorageService` targeting `./storage` with path traversal protections (`secure_filename` and base path resolution checks).
-- **Production Extension**: Extensible to Cloudflare R2 / AWS S3 by providing a `CloudStorageService` adapter without modifying business controllers.
+If an image fails validation, the API returns a human-readable HTTP 400 error targeted at non-technical editors (e.g. *"Poster image must be approximately 600x900 (2:3 aspect ratio). Uploaded image is 800x400 with 2.00 aspect ratio."*).
 
 ---
 
-## 6. Search Scaling & Database Performance Strategy
+## 🛡️ Security & Role-Based Access Control (RBAC)
 
-For initial deployment scale, PostgreSQL queries with composite indexes (`idx_shows_section_category` and `idx_episodes_group_lang`) provide sub-10ms response times.
-
-### Scaling Search as Catalogue Grows (100,000+ Items):
-1. **PostgreSQL Trigram & Full-Text Search**:
-   - Enable `pg_trgm` extension.
-   - Create GIN index on show/episode titles: `CREATE INDEX idx_shows_title_trgm ON shows USING gin (title gin_trgm_ops);`
-2. **Elasticsearch / OpenSearch Offloading**:
-   - If search queries scale beyond database capabilities, mirror the published `catalogue.json` payload into an Elasticsearch cluster.
-   - Index documents by `content_group`, `category`, and `languages`, executing fuzzy search and multi-facet filtering.
+I implemented JWT-based authentication (`HS256`) with strict role enforcement:
+* **`editor` Role**: Can read and mutate shows, seasons, episodes, and upload artwork files.
+* **`admin` Role**: Inherits all editor permissions and is uniquely authorized to execute `POST /admin/catalog/publish`, perform dry-run diffs, and invoke snapshot rollbacks.
+* Role checking is enforced via FastAPI security dependencies (`require_roles([UserRole.ADMIN])`), returning `HTTP 403 Forbidden` if an editor attempts administrative operations.
 
 ---
 
-## 7. Security & Role Enforcement
+## 🌟 Optional Stretch Features Implemented (Section 8)
 
-- **Password Security**: Passwords hashed via `bcrypt` with work factor 12.
-- **Authentication**: JWT tokens signed using `HS256` with configurable expiration.
-- **Role-Based Access Control (RBAC)**:
-  - `Editor`: Can view content, create/update shows, seasons, episodes, and upload artwork.
-  - `Admin`: Performs everything Editor can + executes `POST /admin/catalog/publish`.
-- **API Guard**: Endpoints enforce `require_roles([UserRole.ADMIN])` returning `HTTP 403 Forbidden` if invoked by Editors.
+I had sufficient development time remaining and implemented all 3 optional stretch features:
 
----
-
-## 8. Alerting & Monitoring
-
-### Key Production Alert: Catalogue Publish Failure
-- **Trigger**: When a publish attempt fails due to validation errors or storage write errors.
-- **Metric**: `PublishRun` status == `FAILED` or consecutive failed publish attempts.
-- **Notification**: Emits log event to Sentry / CloudWatch and triggers PagerDuty / Slack alert to platform engineers.
-
----
-
-## 9. Optional Stretch Features Implemented (Section 8)
-
-The following optional stretch features specified in Section 8 of the challenge PDF have been fully implemented and tested:
-
-1. **Versioned Catalogue & One-Click Rollback**:
-   - Every publish run generates an immutable snapshot stored in `storage/history/catalogue_run_<id>.json`.
-   - Admins can execute `POST /admin/catalog/rollback/{run_id}` or click **Rollback** in the CMS Publish History table to instantly restore any historic catalogue version live.
-2. **Publish Dry-Run & Visual Diff Preview**:
-   - `POST /admin/catalog/publish/dry-run` calculates a diff preview between draft DB content and the live published snapshot without altering storage.
-   - CMS displays a visual diff breakdown of **Added Shows**, **Modified Shows**, and **Removed Shows**.
+1. **Versioned Catalogue & One-Click Rollback (`POST /admin/catalog/rollback/{run_id}`)**:
+   - Every publish run writes an immutable historical copy to `storage/history/catalogue_run_<id>.json`.
+   - Admins can instantly restore any historical version live with a single click in the CMS or via API.
+2. **Publish Dry-Run Diff Preview (`POST /admin/catalog/publish/dry-run`)**:
+   - Before publishing, admins can run a dry-run diff. The engine compares the current valid database state with the active `catalogue.json` snapshot and returns a detailed diff showing added, modified, and removed shows.
 3. **Netflix-Style Image Skeleton Loaders**:
-   - Added `@keyframes shimmer` skeleton animation to the Viewer UI for smooth image load handling.
+   - Built custom CSS `@keyframes shimmer` skeleton loading states into the Viewer UI to maintain a smooth visual layout during slow image loads.
 
 ---
 
-## 10. Testing & Quality Assurance
+## 📝 Part E — Written Engineering Responses & Technical Decisions
 
-Run the comprehensive Python test suite inside Docker:
+### 1. How Publishing Was Made Atomic (and Crash Resilience)
+* **Implementation**: Writing directly to `storage/catalogue.json` while readers (viewers) are pulling data risks serving truncated or corrupted JSON. To prevent this, my publishing engine writes the candidate catalogue JSON payload to a temporary file (`catalogue.json.tmp.<uuid>`) inside the storage directory first. Once the payload is completely written and flushed to disk, the engine invokes `os.replace(temp_path, final_path)`.
+* **Crash Resilience**: `os.replace` maps directly to the POSIX `rename()` syscall (and `MoveFileEx` on Windows), which is atomic at the filesystem level. If the process, container, or server dies mid-publish *before* `os.replace` executes, the temporary file is abandoned, and the live `catalogue.json` file remains completely untouched. Concurrent readers will strictly see either the previous complete catalogue or the new complete catalogue — never an incomplete state.
 
-```bash
-docker-compose exec backend pytest -v
-```
-
-Covered Scenarios (18/18 Passing):
-- `test_auth.py`: JWT login and role verification.
-- `test_artwork_validation.py`: PIL dimension, aspect ratio, file size, and path traversal checks.
-- `test_crud_apis.py`: Shows/Episodes CRUD and 409 Conflict handling.
-- `test_validation_report.py`: Pre-flight audit detection.
-- `test_publishing_engine.py`: Atomic replacement, Season 0 exclusion, language grouping, **Dry-Run Diff calculation**, and **Snapshot Rollback**.
-- `test_catalogue_api.py`: Public read decoupling and composed search filters.
-- `test_e2e_integration.py`: End-to-end platform workflow lifecycle.
-
----
-
-## 11. AI Usage Disclosure
-
-In compliance with challenge requirements, AI development assistants were utilized during the project lifecycle:
-- AI tools were used as pair-programming assistants for initial boilerplate scaffolding, typing signatures, unit test generation, and documentation formatting.
-- All generated logic was reviewed, modified, tested, and verified against system requirements by the engineer.
-
----
-
-## 12. Screen-Recording & Demo Flow Checklist
-
-When recording a demo video for submission:
-1. **CMS Login**: Log in as `editor@peblo.tv` -> verify `EDITOR` badge displayed.
-2. **Create Show**: Create a new show, upload poster/banner artwork -> observe live artwork preview.
-3. **Attempt Publish as Editor**: Navigate to `/publish` -> observe permission restricted callout.
-4. **Login as Admin**: Log in as `admin@peblo.tv` -> navigate to `/validation` -> view readiness report.
-5. **Dry-Run Diff**: Click "Preview Diff (Dry Run)" -> view added/modified/removed show diff.
-6. **Publish Catalogue**: Click "Publish Catalogue Now" -> observe successful publish run recorded in history.
-7. **Rollback Feature**: Click "Rollback" on a past history run -> verify catalogue restored.
-8. **Viewer Experience**: Open `http://localhost:3001` -> observe new show on home feed, verify Season 0 trailers section, and filter by language variants.
-
----
-
-## 13. Part E — Technical Trade-Offs & Written Responses
-
-### 1. How Publishing Was Made Atomic (and Crash Handling)
-- **Implementation**: The publishing engine generates candidate JSON in a unique temporary file (`catalogue.json.tmp.<uuid>`) in the storage volume. Once formatting and disk writing complete, an atomic file rename (`os.replace`) swaps the temporary file into place over `catalogue.json`.
-- **Crash Behavior**: `os.replace` is an atomic POSIX / filesystem operation. If the server process or container crashes mid-publish *before* `os.replace` executes, the live `catalogue.json` remains completely untouched. Concurrent readers (the public Viewer app) will continue serving the existing valid snapshot without ever seeing corrupted or partial JSON payloads.
-
-### 2. Storage Abstraction (Local Disk vs Cloudflare R2 / AWS S3)
-- **Implementation**: All file persistence uses the `BaseStorageService` abstract class in `app/storage/base.py` (`save`, `get`, `delete`, `exists`). Local development uses `LocalStorageService` with strict path traversal protections (`secure_filename`).
-- **Cloudflare R2 Transition**: To switch to Cloudflare R2 or AWS S3:
-  1. Create a `CloudStorageService(BaseStorageService)` class wrapping `boto3` or `@aws-sdk/client-s3`.
-  2. Update `get_storage_service()` in `app/storage/factory.py` to instantiate `CloudStorageService` when `STORAGE_TYPE="r2"`.
-  3. No changes to controllers or business logic (`artwork.py`, `publishing.py`, `report.py`) are necessary since all endpoints interact strictly with `BaseStorageService`.
+### 2. Storage Abstraction (Local Disk to Cloudflare R2 / AWS S3)
+* **Current Abstraction**: All storage interactions pass through an abstract base class `BaseStorageService` defined in `app/storage/base.py`:
+  ```python
+  class BaseStorageService(ABC):
+      @abstractmethod
+      def save(self, file_data: BinaryIO, filename: str, subfolder: str = "artwork") -> str: pass
+      @abstractmethod
+      def get(self, relative_path: str) -> Optional[bytes]: pass
+      @abstractmethod
+      def delete(self, relative_path: str) -> bool: pass
+      @abstractmethod
+      def exists(self, relative_path: str) -> bool: pass
+  ```
+* **Migrating to Cloudflare R2**:
+  1. Create a `CloudStorageService(BaseStorageService)` class in `app/storage/cloud.py` using `boto3` (since Cloudflare R2 provides an S3-compatible API).
+  2. Implement `save` to call `s3_client.upload_fileobj()` and return the public R2 CDN URL.
+  3. Update `get_storage_service()` in `app/storage/factory.py` to instantiate `CloudStorageService` when `STORAGE_TYPE == "r2"`.
+  4. Zero changes are needed in API controllers (`artwork.py`, `publishing.py`, etc.) because they depend strictly on the `BaseStorageService` interface.
 
 ### 3. Search Implementation & Scaling Limits
-- **Implementation**: The `GET /catalog/search` endpoint performs composed filtering across show titles, synopsis, categories, sections, and language variants directly on the loaded `catalogue.json`.
-- **Scale Limits**: Performs sub-10ms for catalogues up to ~10,000 items. At 100,000+ items, linear in-memory JSON scanning introduces memory and CPU bottlenecks.
-- **Next Steps for Scale**:
-  1. Enable PostgreSQL `pg_trgm` extension with GIN indexes on show and episode title columns for database search.
-  2. For enterprise scale (1M+ catalog items), ingest published catalogue snapshots into Elasticsearch / OpenSearch with multi-facet filtering and fuzzy query matching.
+* **Current Implementation**: `GET /catalog/search?q=&category=&language=&section=` performs in-memory filtering over the loaded published catalogue data structure. It filters show titles, episode titles, categories, sections, and languages using case-insensitive substring matching.
+* **Scale Limits**:
+  * **0 - 10,000 items**: Sub-10ms response times with negligible CPU overhead.
+  * **10,000 - 50,000 items**: Linear scanning (`O(N)`) introduces measurable latency (~50-150ms) and memory pressure on single-threaded workers.
+  * **100,000+ items**: In-memory JSON iteration breaks down due to high memory footprint and CPU throttling.
+* **Next Steps for Scale**:
+  1. **PostgreSQL Trigram Search**: Move search to the database using PostgreSQL's `pg_trgm` extension and GIN indexes (`CREATE INDEX idx_shows_title_trgm ON shows USING gin (title gin_trgm_ops);`).
+  2. **Elasticsearch / OpenSearch**: At true OTT streaming scale (1M+ catalogue items), index published catalogue snapshots into Elasticsearch. Use multi-match fuzzy queries and dynamic aggregations for fast faceted search.
 
-### 4. Serving Pre-Published Catalogue vs Direct DB Queries
-- **Benefits**:
-  - **Scale & Isolation**: Serving static JSON (or caching via CDN Edge) handles millions of concurrent requests with near-zero database load. Public viewer traffic spikes cannot impact internal CMS performance.
-  - **Atomic Consistency**: Guarantee that viewers only see fully validated, published content snapshots.
-- **Downsides / Trade-offs**:
-  - **Eventual Consistency**: CMS edits are not instantly visible in the public viewer until an explicit publish run is completed by an Admin.
-  - **Payload Size**: A monolithic static JSON file grows in size over time unless split into section/category pages.
+### 4. Serving Pre-Published Static Catalogue vs. Direct DB Queries Per Request
+* **Why Pre-Publish?**:
+  * **Massive Scale & Resilience**: Static JSON files can be served directly from CDN edge locations (Cloudflare, CloudFront) with sub-10ms response times globally. Database CPU/memory is protected from public traffic spikes during popular show releases.
+  * **Guaranteed Content Integrity**: Only content that has passed validation audits (duration present, valid artwork, complete language groups) gets published. Viewers never encounter broken episodes mid-edit.
+* **Where it Bites You (Trade-offs)**:
+  * **Eventual Consistency**: Content edited in the CMS is not immediately visible to viewers until an Admin triggers a publish run.
+  * **Monolithic File Size**: As the catalogue grows to tens of thousands of shows, downloading a single `catalogue.json` payload becomes heavy. To fix this at scale, the publisher should generate paginated or section-based static JSON files (e.g. `catalogue/sections/trending.json`).
 
-### 5. Scope Trade-offs & AI Usage Disclosure
-- **Skipped Features**: Cloudflare R2 live infrastructure provision (abstracted via `BaseStorageService`), and real-time video transcoding (focused strictly on image artwork validation and catalog publishing per requirements).
-- **AI Tool Usage**: AI development assistants (Gemini 3.6 Flash / Antigravity) were used as pair-programming tools for scaffolding schemas, typing signatures, writing initial unit test stubs, and formatting documentation.
-- **Output Review**: All generated logic was thoroughly reviewed, refactored (e.g., adding explicit `os.replace` atomic guarantees, guard checks for `str | None` types, and strict RBAC dependencies), and validated against unit/E2E test suites.
+### 5. What Was Left Out & AI Usage Disclosure
+* **What I Left Out & Why**:
+  * *Live Video Transcoding / Streaming*: Transcoding MP4s into HLS/DASH streams was out of scope for a platform engineering take-home focused on metadata management and catalogue publishing.
+  * *Live Cloudflare R2 Provisioning*: Used local disk storage wrapped behind `BaseStorageService` to keep setup friction-free for reviewers running `docker compose up`.
+* **AI Tool Usage Disclosure**:
+  * I used AI pair-programming assistants (Gemini 3.6 Flash / Antigravity) to speed up repetitive boilerplate (FastAPI Pydantic schemas, SQLAlchemy model definitions, initial unit test stubs, and Markdown formatting).
+  * **Where I Accepted Output**: Data model typings, standard Pydantic validation schemas, basic CSS shimmer keyframes, and initial test fixture structure.
+  * **Where I Rejected / Refactored Output**:
+    * AI initially proposed direct file writes (`open('w')`) for publishing; I rejected this and implemented temporary file writing + `os.replace` for atomic guarantees.
+    * AI generated generic error messages for image validation; I refactored them to include exact uploaded dimensions vs expected dimensions so non-technical editors can fix errors easily.
+    * AI omitted transaction safety in Pytest fixtures; I added explicit transaction rollbacks and isolated SQLite runner databases to prevent test pollution.
 
+---
+
+## 🧪 Automated Testing
+
+I wrote 18 Pytest unit and integration tests covering all critical paths:
+
+```bash
+# Run backend tests inside Docker
+docker compose exec backend python -m pytest -v
+```
+
+### Test Suite Highlights (18/18 Passing):
+* `test_auth.py`: JWT login, password hashing, and role guard enforcement.
+* `test_artwork_validation.py`: Pillow dimension, aspect ratio, file size ceilings, and path traversal security.
+* `test_crud_apis.py`: Show/episode CRUD operations and unique constraint enforcement.
+* `test_publishing_engine.py`: Atomic `os.replace` publishing, Season 0 exclusion, language grouping, dry-run diff preview, and version rollback.
+* `test_validation_report.py`: Pre-flight audit detection for un-publishable items.
+* `test_e2e_integration.py`: Complete lifecycle from CMS show creation to viewer static catalog ingestion.
+
+---
+
+## 📽️ Demo Video Checklist for Evaluators
+
+When reviewing the submission or watching the video demo:
+1. **CMS Editor Flow**: Log in as `editor@peblo.tv` -> Create show -> Upload artwork -> See dimension error callout -> Correct artwork.
+2. **Permission Guard**: Try accessing `/publish` as Editor -> View permission denied alert.
+3. **Admin Flow**: Log in as `admin@peblo.tv` -> View `/validation` readiness report -> Preview Dry-Run Diff -> Click **Publish Catalogue Now**.
+4. **Rollback**: Open Publish History -> Click **Rollback** on a past run -> Verify catalogue state restored.
+5. **Viewer UI**: Open `http://localhost:3001` -> Browse hero banner, section rows, trailer section isolation, search filters, and language variant selectors.
