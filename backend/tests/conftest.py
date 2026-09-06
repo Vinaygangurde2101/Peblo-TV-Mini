@@ -37,6 +37,7 @@ TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engin
 
 @pytest.fixture(scope="session", autouse=True)
 def setup_db():
+    Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
     yield
     Base.metadata.drop_all(bind=engine)
@@ -51,7 +52,8 @@ def db():
     yield session
 
     session.close()
-    transaction.rollback()
+    if transaction.is_active:
+        transaction.rollback()
     connection.close()
 
 
@@ -71,27 +73,29 @@ def client(db: Session):
 
 @pytest.fixture
 def admin_user(db: Session):
-    user = User(
-        email="test_admin@peblo.tv",
-        password_hash=hash_password("admin_pass"),
-        role=UserRole.ADMIN,
-        full_name="Test Admin"
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    user = db.query(User).filter(User.email == "test_admin@peblo.tv").first()
+    if not user:
+        user = User(
+            email="test_admin@peblo.tv",
+            password_hash=hash_password("admin_pass"),
+            role=UserRole.ADMIN,
+            full_name="Test Admin"
+        )
+        db.add(user)
+        db.flush()
     return user
 
 
 @pytest.fixture
 def editor_user(db: Session):
-    user = User(
-        email="test_editor@peblo.tv",
-        password_hash=hash_password("editor_pass"),
-        role=UserRole.EDITOR,
-        full_name="Test Editor"
-    )
-    db.add(user)
-    db.commit()
-    db.refresh(user)
+    user = db.query(User).filter(User.email == "test_editor@peblo.tv").first()
+    if not user:
+        user = User(
+            email="test_editor@peblo.tv",
+            password_hash=hash_password("editor_pass"),
+            role=UserRole.EDITOR,
+            full_name="Test Editor"
+        )
+        db.add(user)
+        db.flush()
     return user
