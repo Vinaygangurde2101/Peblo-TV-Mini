@@ -25,6 +25,7 @@ venv/
 ENV/
 .pytest_cache/
 *.db
+!backend/peblo.db
 
 # Secrets & Local Config
 .env
