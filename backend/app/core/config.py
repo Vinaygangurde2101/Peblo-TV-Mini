@@ -1,6 +1,8 @@
 import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../peblo.db")).replace("\\", "/")
+
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Peblo TV Mini API"
@@ -8,7 +10,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Database
-    DATABASE_URL: str = f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '../../peblo.db')).replace('\\', '/')}"
+    DATABASE_URL: str = f"sqlite:///{_db_path}"
 
     # Auth
     SECRET_KEY: str = "super-secret-development-key-change-in-production-32-chars-min"
