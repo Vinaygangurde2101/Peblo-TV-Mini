@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
 
     # Database
-    DATABASE_URL: str = "sqlite:///./peblo.db"
+    DATABASE_URL: str = f"sqlite:///{os.path.abspath(os.path.join(os.path.dirname(__file__), '../../peblo.db')).replace('\\', '/')}"
 
     # Auth
     SECRET_KEY: str = "super-secret-development-key-change-in-production-32-chars-min"
