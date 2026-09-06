@@ -9,9 +9,20 @@ from app.db.session import get_db
 from app.models.user import User, UserRole
 from app.auth.password import hash_password
 
+import os
 from app.core.config import settings
 
-SQLALCHEMY_DATABASE_URL = settings.DATABASE_URL
+# Use TEST_DATABASE_URL if set, or postgresql in CI, or dedicated test_runner.db locally.
+# Ensures development database (peblo.db) is NEVER mutated by unit tests.
+TEST_DB_URL = os.getenv("TEST_DATABASE_URL")
+if not TEST_DB_URL:
+    if settings.DATABASE_URL.startswith("postgresql"):
+        TEST_DB_URL = settings.DATABASE_URL
+    else:
+        test_db_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../test_runner.db")).replace("\\", "/")
+        TEST_DB_URL = f"sqlite:///{test_db_path}"
+
+SQLALCHEMY_DATABASE_URL = TEST_DB_URL
 
 is_sqlite = SQLALCHEMY_DATABASE_URL.startswith("sqlite")
 engine_kwargs = {}
