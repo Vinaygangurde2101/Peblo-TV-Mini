@@ -325,6 +325,16 @@ export const EpisodesPage: React.FC = () => {
                     onChange={(e) => setFormData({ ...formData, duration_seconds: parseInt(e.target.value) })}
                   />
                 </div>
+                <div className="form-group">
+                  <label>Content Status</label>
+                  <select
+                    value={formData.status}
+                    onChange={(e) => setFormData({ ...formData, status: e.target.value as ContentStatus })}
+                  >
+                    <option value="draft">Draft</option>
+                    <option value="published">Published</option>
+                  </select>
+                </div>
               </div>
 
               <div className="artwork-grid">
