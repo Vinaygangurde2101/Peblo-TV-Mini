@@ -3,7 +3,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 import os
 
+from contextlib import asynccontextmanager
+
 from app.core.config import settings
+from app.db.session import engine, SessionLocal
+from app.db.base import Base
+from app.models.user import User, UserRole
+from app.auth.password import hash_password
+
 from app.api.health import router as health_router
 from app.api.admin.auth import router as auth_router
 from app.api.admin.artwork import router as artwork_router
@@ -14,10 +21,50 @@ from app.api.admin.validation import router as validation_router
 from app.api.admin.publishing import router as publishing_router
 from app.api.catalogue.routes import router as catalogue_router
 
+
+def init_db():
+    Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    try:
+        admin_user = db.query(User).filter(User.email == "admin@peblo.tv").first()
+        if not admin_user:
+            admin_user = User(
+                email="admin@peblo.tv",
+                password_hash=hash_password("admin123"),
+                role=UserRole.ADMIN,
+                full_name="Platform Admin"
+            )
+            db.add(admin_user)
+
+        editor_user = db.query(User).filter(User.email == "editor@peblo.tv").first()
+        if not editor_user:
+            editor_user = User(
+                email="editor@peblo.tv",
+                password_hash=hash_password("editor123"),
+                role=UserRole.EDITOR,
+                full_name="Content Editor"
+            )
+            db.add(editor_user)
+
+        db.commit()
+    except Exception as e:
+        db.rollback()
+        print("Init DB error:", e)
+    finally:
+        db.close()
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
     openapi_url="/openapi.json",
+    lifespan=lifespan,
 )
 
 # CORS Middleware
